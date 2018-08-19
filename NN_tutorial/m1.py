@@ -59,8 +59,8 @@ for t in range(500):
     yhat, hidden = forward(x, w1, w2)
 
     #Calculate our loss matrix. Sample by y_dimension
-    loss_matrix = np.square(y - yhat)
-    loss_gradient = 2 * (y - yhat)
+    loss_matrix = np.square(yhat - y)
+    loss_gradient = 2 * (yhat - y)
 
     #Backpropagate and calculate gradients
     grad_w1, grad_w2 = backward(hidden, x, loss_gradient)

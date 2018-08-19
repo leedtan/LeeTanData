@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 
 
 def l2_loss(y, yhat):
-    loss_matrix = np.square(y - yhat)
-    loss_gradient = 2 * (y - yhat)
+    loss_matrix = np.square(yhat - y)
+    loss_gradient = 2 * (yhat - y)
     return loss_matrix, loss_gradient
 
 

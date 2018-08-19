@@ -35,6 +35,9 @@ class Layer(ABC):
         # Return gradient to input, gradient to parameters
         pass
 
+    def step(self, learning_rate):
+        pass
+
 
 class Lrelu(Layer):
     def __init__(self, input_layer=None, in_size=None):
@@ -46,9 +49,6 @@ class Lrelu(Layer):
     def backward(self, out_grad):
         grad_back = np.where(out_grad > 0, out_grad, out_grad * .1)
         return grad_back
-
-    def optimizer_step(self, learning_rate):
-        pass
 
 
 class Linear(Layer):
@@ -70,7 +70,7 @@ class Linear(Layer):
         # BS, out_size * out_size, in_size = BS, in_size
         return np.matmul(out_grad, self.w.T)
 
-    def optimizer_step(self, learning_rate):
+    def step(self, learning_rate):
         self.vel = apply_linear_momentum(self.vel, self.grad_w, MOMENTUM)
         self.w = self.w - self.vel * learning_rate
 
@@ -96,7 +96,7 @@ class MultiLayerPerceptron():
 
     def step(self, learning_rate):
         for layer in self.layers:
-            layer.optimizer_step(learning_rate)
+            layer.step(learning_rate)
 
 
 class Trainer():

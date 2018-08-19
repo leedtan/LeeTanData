@@ -82,12 +82,18 @@ class Model(ABC):
 
     @abstractmethod
     def forward(self, x):
-        # Forward propagate through layers
         pass
 
     @abstractmethod
     def backward(self, x):
-        # Backpropagate through layers.
+        pass
+
+    @abstractmethod
+    def loss(self, **args):
+        pass
+
+    @abstractmethod
+    def step(self, learning_rate):
         pass
 
 
@@ -102,13 +108,13 @@ class MultiLayerPerceptron(Model):
         yhat = x
         return yhat
 
-    def loss(self, y, yhat):
-        loss_matrix, loss_gradient = self.loss_fcn(y, yhat)
-        return loss_matrix, loss_gradient
-
     def backward(self, loss_gradient):
         for layer in self.layers[::-1]:
             loss_gradient = layer.backward(loss_gradient)
+
+    def loss(self, y, yhat):
+        loss_matrix, loss_gradient = self.loss_fcn(y, yhat)
+        return loss_matrix, loss_gradient
 
     def step(self, learning_rate):
         for layer in self.layers:

@@ -36,7 +36,7 @@ class Layer(ABC):
         pass
 
 
-class lrelu(Layer):
+class Lrelu(Layer):
     def __init__(self, input_layer=None, in_size=None):
         self.out_size = input_layer if input_layer is not None else in_size
 
@@ -45,18 +45,18 @@ class lrelu(Layer):
 
     def backward(self, out_grad):
         grad_back = np.where(out_grad > 0, out_grad, out_grad * .1)
-        return grad_back, None
+        return grad_back
 
-    def optimizer_step(self):
+    def optimizer_step(self, learning_rate):
         pass
 
 
-class linear(Layer):
+class Linear(Layer):
     def __init__(self, input_layer=None, in_size=None, out_size=None):
         self.in_size = input_layer if input_layer is not None else in_size
         self.out_size = out_size
         self.w = np.random.randn(in_size, out_size)
-        self.vel = np.zeros(in_size, out_size)
+        self.vel = np.zeros((in_size, out_size))
 
     def forward(self, x):
         self.prev_input = x
@@ -107,7 +107,7 @@ class MultiLayerPerceptron(Model):
         return loss_matrix, loss_gradient
 
     def backward(self, loss_gradient):
-        for layer in self.layers[:, :, -1]:
+        for layer in self.layers[::-1]:
             loss_gradient = layer.backward(loss_gradient)
 
     def step(self, learning_rate):
@@ -115,10 +115,11 @@ class MultiLayerPerceptron(Model):
             layer.optimizer_step(learning_rate)
 
 
-def Trainer():
-    def __init(self, model):
+class Trainer():
+    def __init__(self, model):
         self.model = model
         self.losses = []
+        self.steps = 0
 
     def optimize(self, x, y, learning_rate):
         model = self.model
@@ -129,60 +130,37 @@ def Trainer():
         loss_rms = np.sqrt(np.square(loss_matrix).sum(1)).mean()
         self.losses.append(loss_rms)
 
+    def train_n_steps(self, n, x, y):
+        for _ in range(n):
+            self.steps += 1
+            self.optimize(x, y, learning_rate=1 / (self.steps + 100))
 
-# N is batch size; D_in is input dimension;
-# H is hidden dimension; D_out is output dimension.
-N, D_in, H, D_out = 64, 1000, 100, 10
+    def visualize(self, skip_first=0):
+        plt.plot(self.losses[skip_first:])
+        plt.title('Loss for model with momentum, clean software\napproaches ' +
+                  str(self.losses[-1])[:5])
+        plt.savefig('model_5.jpg')
+        plt.show()
 
-# Create random input and output data
-x = np.random.randn(N, D_in)
-y = np.random.randn(N, D_out)
 
-for t in range(500):
+if __name__ == "__main__":
+    # N is batch size; D_in is input dimension;
+    # H is hidden dimension; D_out is output dimension.
+    N, D_in, H, D_out = 64, 1000, 100, 10
 
-    # Decaying learning rate
-    learning_rate = 1 / (t + 100)
+    # Create random input and output data
+    x = np.random.randn(N, D_in)
+    y = np.random.randn(N, D_out)
 
-    # Forward propagate through the network
-    if NESTEROV:
-        w1_prime = w1 - w1_m * learning_rate
-        w2_prime = w2 - w2_m * learning_rate
-        yhat, hidden = forward(x, w1_prime, w2_prime)
-    else:
-        yhat, hidden = forward(x, w1, w2)
+    sizes = [D_in, H, D_out]
 
-    # Calculate our loss matrix. Sample by y_dimension
-    loss_matrix, loss_gradient = l2_loss(y, yhat)
+    layers = []
+    layers.append(Linear(in_size=D_in, out_size=H))
+    layers.append(Lrelu(in_size=H))
+    layers.append(Linear(in_size=H, out_size=D_out))
 
-    # Backpropagate and calculate gradients
-    grad_w1, grad_w2 = backward(hidden, x, loss_gradient)
+    model = MultiLayerPerceptron(layers, loss_fcn=l2_loss)
 
-    # Clip our gradients to [-1, 1]
-    grad_w1, grad_w2 = [np.clip(v, -1, 1) for v in [grad_w1, grad_w2]]
-
-    # Update momentum based
-    w1_m = apply_linear_momentum(w1_m, grad_w1, MOMENTUM)
-    w2_m = apply_linear_momentum(w2_m, grad_w2, MOMENTUM)
-
-    # Update the weights by the momentum
-    w1 = w1 - w1_m * learning_rate
-    w2 = w2 - w2_m * learning_rate
-
-    # If Nesterov Momentum is enabled, re-calculate
-    # yhat and loss when checking performance.
-    # Otherwise, we would be evaluating the performance of the nesterov update.
-    if NESTEROV:
-        yhat, _ = forward(x, w1, w2)
-        loss_matrix, _ = l2_loss(y, yhat)
-
-    # norm of the loss vector for each sample. Take the mean between samples
-    loss_rms = np.sqrt(np.square(loss_matrix).sum(1)).mean()
-    losses.append(loss_rms)
-
-print(losses)
-
-# Visualize our losses over time
-plt.plot(losses[300:])
-plt.title('Loss for model with momentum\napproaches ' + str(losses[-1])[:5])
-plt.savefig('model_3.jpg')
-plt.show()
+    trainer = Trainer(model)
+    trainer.train_n_steps(n=500, x=x, y=y)
+    trainer.visualize(skip_first=300)

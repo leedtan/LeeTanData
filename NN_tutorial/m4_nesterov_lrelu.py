@@ -118,6 +118,7 @@ print(losses)
 
 # Visualize our losses over time
 plt.plot(losses[300:])
-plt.title('Loss for model with momentum\napproaches ' + str(losses[-1])[:5])
-plt.savefig('model_3.jpg')
+plt.title('Loss for model with nesterov momentum\napproaches ' +
+          str(losses[-1])[:5])
+plt.savefig('model_4.jpg')
 plt.show()

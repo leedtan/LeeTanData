@@ -75,29 +75,7 @@ class Linear(Layer):
         self.w = self.w - self.vel * learning_rate
 
 
-class Model(ABC):
-    @abstractmethod
-    def __init__(self, layers, **args):
-        pass
-
-    @abstractmethod
-    def forward(self, x):
-        pass
-
-    @abstractmethod
-    def backward(self, x):
-        pass
-
-    @abstractmethod
-    def loss(self, **args):
-        pass
-
-    @abstractmethod
-    def step(self, learning_rate):
-        pass
-
-
-class MultiLayerPerceptron(Model):
+class MultiLayerPerceptron():
     def __init__(self, layers, loss_fcn):
         self.layers = layers
         self.loss_fcn = loss_fcn

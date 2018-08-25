@@ -4,7 +4,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from utils import apply_clipped_optimizer
 pd.set_option("display.max_columns", 200)
 from sklearn.metrics import r2_score
 
@@ -75,8 +74,7 @@ class Model():
         loss_denominator = (tf.reduce_sum(self.loss_indicator)) + EPSILON
         self.loss = loss_numerator / loss_denominator
 
-        opt_fcn = tf.train.AdamOptimizer()
-        self.optimizer = apply_clipped_optimizer(opt_fcn, self.loss)
+        self.optimizer = tf.train.AdamOptimizer().minimize(self.loss)
 
     def train(self, X, Y, sold, epochs):
         sess = tf.Session(config=tf.ConfigProto(device_count={'GPU': 0}))

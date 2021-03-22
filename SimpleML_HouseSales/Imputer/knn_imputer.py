@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.preprocessing import Imputer
+from sklearn.impute import SimpleImputer as Imputer
+
 
 
 class KNNImputer:
